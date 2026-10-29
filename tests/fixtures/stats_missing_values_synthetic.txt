@@ -1,0 +1,9 @@
+# Synthetic complete response with explicitly unavailable and absent values.
+Status: Showtime
+Line Status: No Defect
+Mode: VDSL2 Annex B
+SNR (dB): 4.2 N/A
+Attn(dB): 33.9 -
+Total time = 30 sec
+CRC: 0 -
+

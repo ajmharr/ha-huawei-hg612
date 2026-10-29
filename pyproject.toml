@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "huawei-hg612"
+version = "0.1.0"
+description = "Async Huawei HG612 statistics client and parser"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{name = "Andrew Hart"}]
+dependencies = ["telnetlib3==5.0.1"]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.0,<9",
+  "pytest-asyncio>=0.23,<2",
+  "pytest-cov>=5,<8",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers --strict-config"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+

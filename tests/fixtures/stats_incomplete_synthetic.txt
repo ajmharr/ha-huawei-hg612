@@ -1,0 +1,8 @@
+# Synthetic transport-truncated response: no returned shell prompt in the session.
+Status: Showtime
+Max: Upstream rate = 1177 Kbps, Downstream rate = 16148 Kbps
+Bearer: 0, Upstream rate = 1177 Kbps, Downstream rate = 15713 Kbps
+Total time = 1 hours 20 min 41 sec
+FEC: 14634 0
+CRC:
+

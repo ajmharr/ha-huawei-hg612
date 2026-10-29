@@ -1,0 +1,44 @@
+# Synthetic fixture based on the illustrative excerpt in the project brief.
+Status: Showtime
+Max: Upstream rate = 1177 Kbps, Downstream rate = 16148 Kbps
+Bearer: 0, Upstream rate = 1177 Kbps, Downstream rate = 15713 Kbps
+Line Status: No Defect
+Mode: VDSL2 Annex B
+VDSL2 Profile: Profile 17a
+
+             Down    Up
+SNR (dB):     3.7    6.4
+Attn(dB):    33.6    0.0
+Pwr(dBm):     9.1   10.5
+
+Total time = 1 hours 20 min 41 sec
+FEC: 14634 0
+CRC: 4 1
+ES: 2 0
+SES: 0 0
+UAS: 82 82
+LOS: 0 0
+LOF: 0 0
+
+Latest 15 minutes time = 5 min 41 sec
+FEC: 34 0
+CRC: 1 0
+ES: 1 0
+
+Previous 15 minutes time = 15 min 0 sec
+FEC: 120 0
+CRC: 0 0
+
+Latest 1 day time = 1 hours 20 min 41 sec
+FEC: 14634 0
+CRC: 4 1
+
+Previous 1 day time = 0 sec
+FEC: 0 0
+CRC: 0 0
+
+Since Link time = 1 hours 19 min 17 sec
+FEC: 14500 0
+CRC: 4 1
+ES: 2 0
+

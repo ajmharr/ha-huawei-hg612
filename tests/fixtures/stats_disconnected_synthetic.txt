@@ -1,0 +1,8 @@
+# Synthetic disconnected response. Missing DSL values are valid, not zero.
+Status: Idle
+Line Status: No Signal
+Mode: VDSL2 Annex B
+VDSL2 Profile: Profile 17a
+Total time = 2 min 3 sec
+UAS: 123 123
+
