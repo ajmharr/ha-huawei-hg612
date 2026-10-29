@@ -1,0 +1,1 @@
+# ha-huawei-hg612
