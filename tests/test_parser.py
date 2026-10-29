@@ -2,8 +2,8 @@
 
 from dataclasses import replace
 
-from huawei_hg612.models import CommandResponse, ResponseQuality
-from huawei_hg612.parser import detect_counter_resets, parse_xdsl_stats
+from custom_components.huawei_hg612.models import CommandResponse, ResponseQuality
+from custom_components.huawei_hg612.parser import detect_counter_resets, parse_xdsl_stats
 
 
 def test_parses_showtime_statistics_and_keeps_sections_separate(fixture_text):

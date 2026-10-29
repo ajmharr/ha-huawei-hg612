@@ -1,143 +1,136 @@
-# Huawei HG612 monitoring for Home Assistant
+# Huawei HG612 for Home Assistant
 
-This repository is being developed as a lightweight Home Assistant custom
-integration for monitoring a Huawei EchoLife HG612 VDSL2 modem. It is currently
-at **Phase 1**: a standalone asynchronous Telnet client and a pure parser for
-`xdslcmd info --stats` output.
+A read-only Home Assistant custom integration for monitoring a Huawei EchoLife
+HG612 VDSL2 modem through its Telnet interface. It has been developed and
+validated against unlocked B030SP08 firmware on an HG612 3B.
 
-No Home Assistant entities or configuration flow are included yet.
+The integration reports the physical DSL link. A synchronized line means the
+modem reports `Status: Showtime`; it does **not** mean PPPoE is connected or
+that internet access is available.
 
-## Phase 1 layout
+## Features
+
+- UI configuration with host, Telnet username, Telnet password, and polling
+  interval
+- One shared asynchronous poll for every entity, defaulting to 60 seconds
+- DSL synchronization status, sync and attainable rates, SNR, attenuation,
+  transmit power, mode, profile, and uptime
+- Downstream and upstream FEC, CRC, ES, SES, UAS, LOS, and LOF counters
+- Raw modem counter resets preserved for correct Home Assistant long-term
+  statistics handling
+- Automatic entity unavailability and recovery after communication failures
+- Redacted diagnostics with no credentials or raw Telnet response
+- No modem configuration or connectivity control
+
+## Installation
+
+### HACS custom repository
+
+Until this integration is published in the default HACS repository:
+
+1. Open HACS in Home Assistant.
+2. Open the menu and choose **Custom repositories**.
+3. Add `https://github.com/ajmharr/ha-huawei-hg612` with type
+   **Integration**.
+4. Find **Huawei HG612** in HACS and download it.
+5. Restart Home Assistant.
+
+No release has been published yet, so this path is prepared but not available
+until the repository is pushed and an approved release is created.
+
+### Manual test installation
+
+Copy `custom_components/huawei_hg612` into the Home Assistant configuration
+directory so the resulting path is:
 
 ```text
-src/huawei_hg612/
-  client.py       asynchronous Huawei ATP/BusyBox Telnet workflow
-  parser.py       section-aware DSL statistics parser
-  models.py       typed command and statistics models
-  exceptions.py   communication and protocol failures
-tests/
-  fixtures/       explicitly synthetic modem responses
-  test_client.py  simulated Telnet sessions
-  test_parser.py  parser and counter reset tests
+<config>/custom_components/huawei_hg612/manifest.json
 ```
 
-The modem library does not import Home Assistant. During Phase 2 these small
-modules can be placed inside `custom_components/huawei_hg612` without requiring
-users to install a separate local package. The only runtime dependency is the
-pure-Python `telnetlib3` package, pinned for reproducible installation. A future
-Home Assistant manifest will also pin this requirement as required by Home
-Assistant.
+Restart Home Assistant after copying or updating the files. Home Assistant
+installs the pinned `telnetlib3` requirement from the integration manifest.
 
-## Response completeness
+## Configuration
 
-Missing statistics and incomplete transport responses are deliberately
-different conditions:
+1. Go to **Settings → Devices & services**.
+2. Select **Add integration**.
+3. Search for **Huawei HG612**.
+4. Enter the modem IP address or hostname, Telnet username, Telnet password,
+   and polling interval.
 
-- A command that returns normally to the BusyBox prompt is a `COMPLETE`
-  response. Individual values may still be absent or reported as `N/A`; the
-  parser represents those values as `None` and never invents zeroes.
-- A timeout or disconnect before the prompt returns raises
-  `IncompleteResponseError`. The exception retains the partial output for
-  diagnostics. It must not be treated as a successful poll.
-- The parser can parse partial diagnostic text when it is explicitly wrapped
-  in a `CommandResponse` marked `INCOMPLETE`; the resulting statistics remain
-  marked incomplete.
+The polling interval defaults to 60 seconds and accepts 30–3600 seconds. It can
+be changed later from the integration's **Configure** action.
 
-This distinction lets the future Home Assistant coordinator keep entities
-available when a valid response omits an unsupported statistic, while marking
-an update unsuccessful when communication truncates the response.
+Each poll creates one short Telnet session, authenticates, runs only `sh` and
+`xdslcmd info --stats`, captures the complete response, and closes the
+transport. Every entity consumes that single result.
 
-## Telnet workflow
+## Entities
 
-Each poll uses a fresh connection and follows the modem-specific prompt flow:
+The integration creates 27 sensors and one binary sensor:
 
-1. Connect using `telnetlib3`, which handles Telnet option negotiation.
-2. Recognise a username or password prompt and authenticate.
-3. Wait for the Huawei `ATP>` prompt.
-4. Run `sh` and wait for the BusyBox `#` prompt.
-5. Run `xdslcmd info --stats` and collect output until `#` returns.
-6. Attempt a clean logout and close the connection.
+- downstream/upstream sync and maximum attainable rates
+- downstream/upstream SNR margin, attenuation, and transmit power
+- DSL uptime, mode, and VDSL profile
+- downstream/upstream FEC, CRC, ES, SES, UAS, LOS, and LOF totals
+- **DSL synchronized**, based only on the modem's DSL status
 
-Connection, prompt, and command operations have independent timeouts. Passwords
-and authentication exchanges are never logged.
+Measurement entities use Home Assistant measurement state classes. Modem error
+counters use `total_increasing`; when the modem restarts or DSL resynchronizes,
+the lower raw value is exposed directly so Home Assistant can identify a new
+counter cycle. The integration never adds an offset or invents continuity.
 
-## Parser behavior
-
-The parser handles global line properties separately from counter reporting
-periods. Recognised counter sections are:
-
-- total
-- current and previous 15-minute periods
-- current and previous daily periods
-- since-link
-
-Repeated names such as `FEC` and `CRC` are stored beneath their section and do
-not overwrite total counters. Unknown lines are retained in `unparsed_lines`,
-and the original response is retained in `raw_output`. Counter decreases can be
-detected explicitly with `detect_counter_resets`; missing counters are not
-interpreted as resets.
-
-## Development and tests
-
-Python 3.9 or newer is required for the standalone package.
-
-```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install -e '.[test]'
-.venv/bin/pytest -q --cov=huawei_hg612 --cov-report=term-missing
-```
-
-Tests use simulated Telnet streams and synthetic DSL fixtures. They never
-connect to a modem or Home Assistant installation.
-
-## Read-only modem verification
-
-The standalone verifier performs one statistics request against a modem and
-prints DSL status, sync rates, SNR margins, total error counters, and any lines
-or reporting sections the parser did not recognise. Both the username and
-password are requested at runtime with terminal echo disabled.
-
-From the repository directory, run:
-
-```bash
-.venv/bin/python -m huawei_hg612.verify
-```
-
-The host defaults to `192.168.50.2` and the Telnet port defaults to `23`. To
-save only the raw `xdslcmd` response for troubleshooting:
-
-```bash
-.venv/bin/python -m huawei_hg612.verify --save-raw hg612-stats.txt
-```
-
-The capture is created with mode `0600`, contains neither credentials nor the
-authentication exchange, and refuses to overwrite an existing file. The
-verifier sends only `sh` and `xdslcmd info --stats` after authentication, then
-closes the Telnet transport. It does not change modem settings.
+If a complete modem response legitimately omits an unsupported value, only
+that entity is unavailable. A timeout, disconnect, or incomplete response
+marks all coordinator-backed entities unavailable until a later successful
+poll.
 
 ## Security
 
-Telnet sends credentials and modem data without encryption. Use this client
-only on a trusted, access-controlled management network. This software does not
-modify modem firewall settings, DSL settings, WAN connectivity, or PPPoE
-configuration.
+Telnet is unencrypted: credentials and modem data travel in plaintext. Restrict
+port 23 to a trusted management network and do not expose it to the internet.
+This integration does not modify the modem firewall, DSL settings, interfaces,
+WAN connectivity, or PPPoE configuration.
 
-Credentials must be supplied by the caller and must not be placed in source
-control. Phase 2 will store them through Home Assistant's configuration entry
-mechanism and redact them from diagnostics.
+Credentials are stored in the Home Assistant config entry. Diagnostics redact
+the host, username, and password and exclude the raw command response.
 
-## Current limitations
+## Standalone read-only verification
 
-- Fixtures are synthetic and based on the illustrative excerpt supplied for
-  development. The parser has also been checked locally against one complete
-  HG612 B030SP08 response captured during an approved read-only verification;
-  that user capture is not stored in the repository.
-- The approved read-only test confirmed the observed login prompts, ATP and
-  BusyBox transitions, ASCII decoding, command completion, and transport close
-  behavior for one modem. Other firmware variants may still differ.
-- Framing, retransmission, bearer-detail, and G.INP diagnostic blocks are
-  recognised as valid modem output but are not normalized into Phase 1 models.
-- The upstream attenuation value reported by some firmware may be meaningless;
-  the parser preserves it but does not judge its validity.
-- Phase 1 has no polling scheduler, retry policy, Home Assistant coordinator,
-  entities, config flow, or diagnostics endpoint.
+The Phase 1 verifier remains available from a development checkout. It prompts
+for both credentials with terminal echo disabled:
+
+```bash
+python -m custom_components.huawei_hg612.verify
+```
+
+To create an owner-only raw response file without overwriting an existing file:
+
+```bash
+python -m custom_components.huawei_hg612.verify --save-raw hg612-stats.txt
+```
+
+## Development and tests
+
+The integration targets current Home Assistant releases. The committed test
+container pins Home Assistant 2026.10.4 and runs with networking disabled:
+
+```bash
+docker build -f .docker/Dockerfile.test -t ha-huawei-hg612-test:2026.10.4 .
+docker run --rm --network none -v "$PWD:/workspace" \
+  ha-huawei-hg612-test:2026.10.4 pytest -q
+```
+
+Tests use simulated Telnet sessions and representative synthetic output derived
+from the validated B030SP08 response format. They do not require a modem or a
+running Home Assistant installation.
+
+## Parser behavior and limitations
+
+The parser keeps total, current/previous 15-minute, current/previous daily, and
+since-link counter sections separate. Missing values remain `None`; they are
+never reported as zero. Framing, bearer-detail, retransmission, and G.INP
+diagnostics are recognized as valid output but are not exposed as entities.
+
+The B030SP08 upstream attenuation placeholder of `0.0 dB` is retained in parsed
+diagnostics but is not exposed as a valid entity state.

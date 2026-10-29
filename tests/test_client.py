@@ -4,14 +4,14 @@ import asyncio
 
 import pytest
 
-from huawei_hg612.client import HuaweiHG612Client
-from huawei_hg612.exceptions import (
+from custom_components.huawei_hg612.client import HuaweiHG612Client
+from custom_components.huawei_hg612.exceptions import (
     AuthenticationError,
     ConnectionTimeoutError,
     IncompleteResponseError,
     UnexpectedPromptError,
 )
-from huawei_hg612.models import ResponseQuality
+from custom_components.huawei_hg612.models import ResponseQuality
 
 
 class ScriptedReader:

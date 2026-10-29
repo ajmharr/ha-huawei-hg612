@@ -5,7 +5,7 @@ import stat
 
 import pytest
 
-from huawei_hg612.verify import format_summary, save_raw_response, verify_modem
+from custom_components.huawei_hg612.verify import format_summary, save_raw_response, verify_modem
 
 
 class SimulatedReader:
@@ -79,8 +79,8 @@ async def test_verifier_uses_only_read_commands_and_parses_response(fixture_text
 
 
 def test_summary_contains_requested_statistics(fixture_text):
-    from huawei_hg612.models import CommandResponse
-    from huawei_hg612.parser import parse_xdsl_stats
+    from custom_components.huawei_hg612.models import CommandResponse
+    from custom_components.huawei_hg612.parser import parse_xdsl_stats
 
     stats = parse_xdsl_stats(CommandResponse(fixture_text("stats_showtime_synthetic.txt")))
 

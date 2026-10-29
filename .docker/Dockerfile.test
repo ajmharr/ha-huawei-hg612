@@ -1,0 +1,10 @@
+FROM ghcr.io/home-assistant/home-assistant:2026.10.4
+
+RUN python -m pip install --no-cache-dir \
+    pytest==8.4.2 \
+    pytest-asyncio==1.2.0 \
+    pytest-cov==7.1.0
+
+WORKDIR /workspace
+ENV PYTHONPATH=/workspace
+CMD ["pytest", "-q"]

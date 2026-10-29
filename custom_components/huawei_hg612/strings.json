@@ -1,0 +1,76 @@
+{
+  "title": "Huawei HG612",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Huawei HG612",
+        "description": "Enter the modem's Telnet credentials. Telnet is unencrypted; use only on a trusted management network.",
+        "data": {
+          "host": "Host",
+          "username": "Telnet username",
+          "password": "Telnet password",
+          "scan_interval": "Polling interval"
+        },
+        "data_description": {
+          "host": "IP address or hostname of the modem.",
+          "scan_interval": "Seconds between read-only statistics requests (30–3600)."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to the modem or retrieve a complete response.",
+      "invalid_auth": "The modem rejected the Telnet credentials.",
+      "unknown": "Unexpected error while validating the modem connection."
+    },
+    "abort": {
+      "already_configured": "This modem is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Huawei HG612 options",
+        "data": {
+          "scan_interval": "Polling interval"
+        },
+        "data_description": {
+          "scan_interval": "Seconds between read-only statistics requests (30–3600)."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "downstream_sync_speed": {"name": "Downstream sync speed"},
+      "upstream_sync_speed": {"name": "Upstream sync speed"},
+      "downstream_attainable_speed": {"name": "Downstream attainable speed"},
+      "upstream_attainable_speed": {"name": "Upstream attainable speed"},
+      "downstream_snr_margin": {"name": "Downstream SNR margin"},
+      "upstream_snr_margin": {"name": "Upstream SNR margin"},
+      "downstream_line_attenuation": {"name": "Downstream line attenuation"},
+      "upstream_line_attenuation": {"name": "Upstream line attenuation"},
+      "downstream_transmit_power": {"name": "Downstream transmit power"},
+      "upstream_transmit_power": {"name": "Upstream transmit power"},
+      "dsl_uptime": {"name": "DSL uptime"},
+      "downstream_fec": {"name": "Downstream FEC corrections"},
+      "upstream_fec": {"name": "Upstream FEC corrections"},
+      "downstream_crc": {"name": "Downstream CRC errors"},
+      "upstream_crc": {"name": "Upstream CRC errors"},
+      "downstream_es": {"name": "Downstream errored seconds"},
+      "upstream_es": {"name": "Upstream errored seconds"},
+      "downstream_ses": {"name": "Downstream severely errored seconds"},
+      "upstream_ses": {"name": "Upstream severely errored seconds"},
+      "downstream_uas": {"name": "Downstream unavailable seconds"},
+      "upstream_uas": {"name": "Upstream unavailable seconds"},
+      "downstream_los": {"name": "Downstream loss of signal"},
+      "upstream_los": {"name": "Upstream loss of signal"},
+      "downstream_lof": {"name": "Downstream loss of frame"},
+      "upstream_lof": {"name": "Upstream loss of frame"},
+      "dsl_mode": {"name": "DSL mode"},
+      "vdsl_profile": {"name": "VDSL profile"}
+    },
+    "binary_sensor": {
+      "dsl_synchronized": {"name": "DSL synchronized"}
+    }
+  }
+}

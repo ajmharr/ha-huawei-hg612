@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "huawei-hg612"
-version = "0.1.0"
-description = "Async Huawei HG612 statistics client and parser"
+version = "0.2.0"
+description = "Huawei HG612 Home Assistant custom integration"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [{name = "Andrew Hart"}]
@@ -19,7 +19,8 @@ test = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
+include = ["custom_components.huawei_hg612*"]
 
 [tool.pytest.ini_options]
 addopts = "--strict-markers --strict-config"
