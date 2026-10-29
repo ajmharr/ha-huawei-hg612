@@ -40,6 +40,7 @@ class HuaweiHG612Client:
         prompt_timeout: float = 10.0,
         command_timeout: float = 20.0,
         connector: Optional[Connector] = None,
+        logout_commands: Sequence[str] = ("exit", "quit"),
     ) -> None:
         self.host = host
         self.port = port
@@ -49,6 +50,7 @@ class HuaweiHG612Client:
         self._prompt_timeout = prompt_timeout
         self._command_timeout = command_timeout
         self._connector = connector
+        self._logout_commands = tuple(logout_commands)
 
     async def get_statistics(self) -> CommandResponse:
         """Open one session, retrieve statistics, and close it cleanly."""
@@ -192,11 +194,10 @@ class HuaweiHG612Client:
             lines.pop()
         return "\n".join(lines).strip("\n")
 
-    @staticmethod
-    async def _close_session(writer: Any) -> None:
+    async def _close_session(self, writer: Any) -> None:
         try:
-            writer.write("exit\r\n")
-            writer.write("quit\r\n")
+            for command in self._logout_commands:
+                writer.write(command + "\r\n")
         except (OSError, RuntimeError):
             pass
         close = getattr(writer, "close", None)

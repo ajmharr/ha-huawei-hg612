@@ -90,6 +90,31 @@ python3 -m venv .venv
 Tests use simulated Telnet streams and synthetic DSL fixtures. They never
 connect to a modem or Home Assistant installation.
 
+## Read-only modem verification
+
+The standalone verifier performs one statistics request against a modem and
+prints DSL status, sync rates, SNR margins, total error counters, and any lines
+or reporting sections the parser did not recognise. Both the username and
+password are requested at runtime with terminal echo disabled.
+
+From the repository directory, run:
+
+```bash
+.venv/bin/python -m huawei_hg612.verify
+```
+
+The host defaults to `192.168.50.2` and the Telnet port defaults to `23`. To
+save only the raw `xdslcmd` response for troubleshooting:
+
+```bash
+.venv/bin/python -m huawei_hg612.verify --save-raw hg612-stats.txt
+```
+
+The capture is created with mode `0600`, contains neither credentials nor the
+authentication exchange, and refuses to overwrite an existing file. The
+verifier sends only `sh` and `xdslcmd info --stats` after authentication, then
+closes the Telnet transport. It does not change modem settings.
+
 ## Security
 
 Telnet sends credentials and modem data without encryption. Use this client

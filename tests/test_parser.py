@@ -95,3 +95,20 @@ def test_missing_counter_is_not_a_reset(fixture_text):
 
     assert detect_counter_resets(previous, current) == ()
 
+
+def test_unknown_section_does_not_overwrite_known_counters():
+    response = CommandResponse(
+        "Total time = 1 min 0 sec\n"
+        "CRC: 10 1\n"
+        "Experimental period time = 30 sec\n"
+        "CRC: 99 99\n"
+    )
+
+    stats = parse_xdsl_stats(response)
+
+    assert stats.counter_sections["total"].counters["CRC"].downstream == 10
+    assert stats.unparsed_lines == (
+        "Experimental period time = 30 sec",
+        "CRC: 99 99",
+    )
+

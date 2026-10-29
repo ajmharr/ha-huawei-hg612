@@ -24,6 +24,7 @@ _PAIR_RE = re.compile(
     re.IGNORECASE,
 )
 _COUNTER_RE = re.compile(r"^([A-Za-z][A-Za-z0-9 _/-]*):\s*(-|\d+)\s+(-|\d+)\s*$")
+_UNKNOWN_SECTION_RE = re.compile(r"\btime\s*=", re.IGNORECASE)
 _DURATION_RE = re.compile(
     r"(?:(\d+)\s*days?\s*)?(?:(\d+)\s*hours?\s*)?"
     r"(?:(\d+)\s*min(?:utes?)?\s*)?(?:(\d+)\s*sec(?:onds?)?\s*)?",
@@ -100,6 +101,14 @@ def parse_xdsl_stats(
                 total_duration = duration
             elif current_section == "since_link":
                 link_duration = duration
+            continue
+
+        # Do not attach counters beneath an unknown reporting-period heading
+        # to the preceding known section. Preserve the whole unknown block as
+        # unparsed instead.
+        if _UNKNOWN_SECTION_RE.search(line):
+            current_section = None
+            unparsed.append(original_line)
             continue
 
         if line.startswith("Status:"):

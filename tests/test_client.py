@@ -110,6 +110,35 @@ async def test_password_only_authentication_prompt(fixture_text):
 
 
 @pytest.mark.asyncio
+async def test_can_close_transport_without_sending_logout_commands():
+    connector, writer = scripted_connector(
+        "Login: ",
+        {
+            "admin\r\n": "Password: ",
+            "secret\r\n": "ATP>",
+            "sh\r\n": "# ",
+            "xdslcmd info --stats\r\n": "Status: Idle\r\n# ",
+        },
+    )
+    client = HuaweiHG612Client(
+        "192.0.2.1",
+        "admin",
+        "secret",
+        connector=connector,
+        logout_commands=(),
+    )
+
+    await client.get_statistics()
+
+    assert writer.writes == [
+        "admin\r\n",
+        "secret\r\n",
+        "sh\r\n",
+        "xdslcmd info --stats\r\n",
+    ]
+
+
+@pytest.mark.asyncio
 async def test_incorrect_credentials():
     connector, _ = scripted_connector(
         "Login: ",
