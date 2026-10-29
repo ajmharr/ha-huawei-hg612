@@ -13,7 +13,7 @@ from .models import (
 )
 
 _RATE_RE = re.compile(
-    r"^(Max|Bearer):(?:\s*\d+,)?\s*Upstream rate\s*=\s*(\d+)\s*Kbps,\s*"
+    r"^(Max|Bearer):(?:\s*(\d+),)?\s*Upstream rate\s*=\s*(\d+)\s*Kbps,\s*"
     r"Downstream rate\s*=\s*(\d+)\s*Kbps\s*$",
     re.IGNORECASE,
 )
@@ -25,6 +25,11 @@ _PAIR_RE = re.compile(
 )
 _COUNTER_RE = re.compile(r"^([A-Za-z][A-Za-z0-9 _/-]*):\s*(-|\d+)\s+(-|\d+)\s*$")
 _UNKNOWN_SECTION_RE = re.compile(r"\btime\s*=", re.IGNORECASE)
+_DETAIL_HEADING_RE = re.compile(
+    r"^(?:xdslcmd: ADSL driver and PHY status|VDSL2 framing|Bearer \d+|Counters|"
+    r"Retransmit Counters|G\.INP Counters|Down\s+Up)$",
+    re.IGNORECASE,
+)
 _DURATION_RE = re.compile(
     r"(?:(\d+)\s*days?\s*)?(?:(\d+)\s*hours?\s*)?"
     r"(?:(\d+)\s*min(?:utes?)?\s*)?(?:(\d+)\s*sec(?:onds?)?\s*)?",
@@ -85,6 +90,8 @@ def parse_xdsl_stats(
     section_counters: Dict[str, Dict[str, CounterValues]] = {}
     section_durations: Dict[str, Optional[int]] = {}
     current_section: Optional[str] = None
+    reporting_started = False
+    ignored_details: List[str] = []
     unparsed: List[str] = []
 
     for original_line in response.output.splitlines():
@@ -94,6 +101,7 @@ def parse_xdsl_stats(
 
         section = _section_for_line(line)
         if section:
+            reporting_started = True
             current_section, duration = section
             section_durations[current_section] = duration
             section_counters.setdefault(current_section, {})
@@ -126,10 +134,10 @@ def parse_xdsl_stats(
 
         rate_match = _RATE_RE.match(line)
         if rate_match:
-            pair = (int(rate_match.group(3)), int(rate_match.group(2)))
+            pair = (int(rate_match.group(4)), int(rate_match.group(3)))
             if rate_match.group(1).casefold() == "max":
                 attainable_rate = pair
-            else:
+            elif rate_match.group(2) in {None, "0"}:
                 sync_rate = pair
             continue
 
@@ -157,6 +165,13 @@ def parse_xdsl_stats(
             )
             continue
 
+        # The full HG612 response includes framing, bearer, retransmission and
+        # G.INP diagnostics before the reporting-period counters. They are
+        # valid modem detail but outside Phase 1's normalized data model.
+        if not reporting_started and (":" in line or _DETAIL_HEADING_RE.match(line)):
+            ignored_details.append(original_line)
+            continue
+
         unparsed.append(original_line)
 
     for name, counters in section_counters.items():
@@ -181,6 +196,7 @@ def parse_xdsl_stats(
         total_duration_seconds=total_duration,
         link_duration_seconds=link_duration,
         counter_sections=sections,
+        ignored_detail_lines=tuple(ignored_details),
         unparsed_lines=tuple(unparsed),
     )
 

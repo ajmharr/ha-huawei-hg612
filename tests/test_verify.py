@@ -91,6 +91,7 @@ def test_summary_contains_requested_statistics(fixture_text):
     assert "SNR margin: down 3.7 dB, up 6.4 dB" in summary
     assert "FEC: down 14634, up 0" in summary
     assert "CRC: down 4, up 1" in summary
+    assert "Additional modem diagnostics: 6 recognised lines not normalized" in summary
     assert "Unrecognised lines/sections: none" in summary
 
 

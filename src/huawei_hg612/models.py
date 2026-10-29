@@ -63,6 +63,7 @@ class DslStatistics:
     total_duration_seconds: Optional[int] = None
     link_duration_seconds: Optional[int] = None
     counter_sections: Dict[str, CounterSection] = field(default_factory=dict)
+    ignored_detail_lines: Tuple[str, ...] = ()
     unparsed_lines: Tuple[str, ...] = ()
 
     @property

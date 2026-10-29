@@ -26,6 +26,8 @@ def test_parses_showtime_statistics_and_keeps_sections_separate(fixture_text):
     assert stats.counter_sections["current_15_minutes"].counters["FEC"].downstream == 34
     assert stats.counter_sections["previous_15_minutes"].counters["FEC"].downstream == 120
     assert stats.counter_sections["since_link"].counters["FEC"].downstream == 14500
+    assert len(stats.ignored_detail_lines) == 6
+    assert stats.unparsed_lines == ()
 
 
 def test_disconnected_response_is_complete_with_missing_values(fixture_text):

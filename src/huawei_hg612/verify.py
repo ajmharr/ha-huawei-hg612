@@ -58,6 +58,12 @@ def format_summary(stats: DslStatistics) -> str:
         values = total.counters.get(name) if total else None
         lines.append(f"    {name}: {_counter_text(values)}")
 
+    if stats.ignored_detail_lines:
+        lines.append(
+            "  Additional modem diagnostics: "
+            f"{len(stats.ignored_detail_lines)} recognised lines not normalized"
+        )
+
     if stats.unparsed_lines:
         lines.append(f"  Unrecognised lines/sections: {len(stats.unparsed_lines)}")
         lines.extend(f"    {line}" for line in stats.unparsed_lines)

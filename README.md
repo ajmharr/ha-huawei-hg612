@@ -129,11 +129,14 @@ mechanism and redact them from diagnostics.
 ## Current limitations
 
 - Fixtures are synthetic and based on the illustrative excerpt supplied for
-  development. The parser has not been validated against a complete HG612
-  B030SP08 capture.
-- Exact prompt spelling, prompt decoration, character encoding, Telnet option
-  behavior, and the clean logout sequence still require read-only live-device
-  validation in a later approved phase.
+  development. The parser has also been checked locally against one complete
+  HG612 B030SP08 response captured during an approved read-only verification;
+  that user capture is not stored in the repository.
+- The approved read-only test confirmed the observed login prompts, ATP and
+  BusyBox transitions, ASCII decoding, command completion, and transport close
+  behavior for one modem. Other firmware variants may still differ.
+- Framing, retransmission, bearer-detail, and G.INP diagnostic blocks are
+  recognised as valid modem output but are not normalized into Phase 1 models.
 - The upstream attenuation value reported by some firmware may be meaningless;
   the parser preserves it but does not judge its validity.
 - Phase 1 has no polling scheduler, retry policy, Home Assistant coordinator,

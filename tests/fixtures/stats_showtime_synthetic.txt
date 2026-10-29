@@ -2,6 +2,7 @@
 Status: Showtime
 Max: Upstream rate = 1177 Kbps, Downstream rate = 16148 Kbps
 Bearer: 0, Upstream rate = 1177 Kbps, Downstream rate = 15713 Kbps
+Bearer: 1, Upstream rate = 0 Kbps, Downstream rate = 0 Kbps
 Line Status: No Defect
 Mode: VDSL2 Annex B
 VDSL2 Profile: Profile 17a
@@ -10,6 +11,13 @@ VDSL2 Profile: Profile 17a
 SNR (dB):     3.7    6.4
 Attn(dB):    33.6    0.0
 Pwr(dBm):     9.1   10.5
+
+            VDSL2 framing
+            Bearer 0
+MSGc: -6 26
+            G.INP Counters
+LEFTRS: 0 0
+Bitswap: 7212/7217 1/1
 
 Total time = 1 hours 20 min 41 sec
 FEC: 14634 0
